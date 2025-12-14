@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Tracker - Track Your Order</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --info: #3b82f6;
+            --dark: #0f172a;
+            --dark-light: #1e293b;
+            --dark-lighter: #334155;
+            --text: #f1f5f9;
+            --text-muted: #94a3b8;
+            --border: #475569;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%);
+            min-height: 100vh;
+            color: var(--text);
+            overflow-x: hidden;
+        }
+
+        .bg-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        .bg-animation .circle {
+            position: absolute;
+            border-radius: 50%;
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(139, 92, 246, 0.05));
+            animation: float 20s infinite;
+        }
+
+        .bg-animation .circle:nth-child(1) {
+            width: 400px;
+            height: 400px;
+            top: -100px;
+            right: -100px;
+            animation-delay: 0s;
+        }
+
+        .bg-animation .circle:nth-child(2) {
+            width: 300px;
+            height: 300px;
+            bottom: -50px;
+            left: -50px;
+            animation-delay: -5s;
+        }
+
+        .bg-animation .circle:nth-child(3) {
+            width: 200px;
+            height: 200px;
+            top: 50%;
+            left: 50%;
+            animation-delay: -10s;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            25% { transform: translate(50px, 50px) rotate(90deg); }
+            50% { transform: translate(0, 100px) rotate(180deg); }
+            75% { transform: translate(-50px, 50px) rotate(270deg); }
+        }
+
+        .container {
+            max-width: 700px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            animation: slideDown 0.8s ease-out;
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .logo {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, var(--primary), #8b5cf6);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            font-size: 32px;
+            box-shadow: 0 20px 40px rgba(99, 102, 241, 0.3);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 20px 40px rgba(99, 102, 241, 0.3); }
+            50% { box-shadow: 0 25px 50px rgba(99, 102, 241, 0.5); }
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #fff, #c7d2fe);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+        }
+
+        .search-card {
+            background: rgba(30, 41, 59, 0.8);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(71, 85, 105, 0.5);
+            border-radius: 24px;
+            padding: 40px;
+            animation: slideUp 0.8s ease-out 0.2s both;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .input-group {
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .input-group i {
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            font-size: 1.2rem;
+            transition: color 0.3s;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 18px 20px 18px 55px;
+            background: var(--dark);
+            border: 2px solid var(--border);
+            border-radius: 16px;
+            color: var(--text);
+            font-size: 1.1rem;
+            font-family: inherit;
+            transition: all 0.3s ease;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.2);
+        }
+
+        .input-group input:focus + i,
+        .input-group input:not(:placeholder-shown) + i {
+            color: var(--primary);
+        }
+
+        .input-group input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 18px;
+            border: none;
+            border-radius: 16px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), #8b5cf6);
+            color: white;
+            box-shadow: 0 10px 30px rgba(99, 102, 241, 0.4);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 40px rgba(99, 102, 241, 0.5);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        .btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        .loading-spinner {
+            width: 24px;
+            height: 24px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .alert {
+            padding: 16px 20px;
+            border-radius: 12px;
+            margin-top: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            animation: shake 0.5s ease-out;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-5px); }
+            40%, 80% { transform: translateX(5px); }
+        }
+
+        .alert-error {
+            background: rgba(239, 68, 68, 0.15);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #fca5a5;
+        }
+
+        .alert-success {
+            background: rgba(16, 185, 129, 0.15);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            color: #6ee7b7;
+        }
+
+        .order-card {
+            margin-top: 30px;
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .order-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .order-id {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        .order-id span {
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .status-badge {
+            padding: 8px 16px;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            animation: statusPulse 2s infinite;
+        }
+
+        .status-pending {
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.2), rgba(245, 158, 11, 0.1));
+            color: #fbbf24;
+            border: 1px solid rgba(245, 158, 11, 0.3);
+        }
+
+        .status-processing {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(59, 130, 246, 0.1));
+            color: #60a5fa;
+            border: 1px solid rgba(59, 130, 246, 0.3);
+        }
+
+        .status-completed {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(16, 185, 129, 0.1));
+            color: #34d399;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        .status-cancelled {
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.2), rgba(239, 68, 68, 0.1));
+            color: #f87171;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
+        @keyframes statusPulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .info-item {
+            background: var(--dark);
+            padding: 16px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            transition: all 0.3s ease;
+        }
+
+        .info-item:hover {
+            border-color: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        .info-item.full-width {
+            grid-column: span 2;
+        }
+
+        .info-label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .info-value {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .info-value.amount {
+            color: var(--success);
+        }
+
+        .info-value.unpaid {
+            color: var(--danger);
+        }
+
+        .info-value.paid {
+            color: var(--success);
+        }
+
+        .payment-link-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 24px;
+            background: linear-gradient(135deg, var(--success), #059669);
+            color: white;
+            text-decoration: none;
+            border-radius: 12px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+        }
+
+        .payment-link-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(16, 185, 129, 0.4);
+        }
+
+        .timeline-section {
+            margin-top: 25px;
+        }
+
+        .timeline-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .timeline {
+            position: relative;
+            padding-left: 30px;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 8px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: linear-gradient(to bottom, var(--primary), var(--dark-lighter));
+        }
+
+        .timeline-item {
+            position: relative;
+            padding: 15px;
+            background: var(--dark);
+            border-radius: 12px;
+            margin-bottom: 15px;
+            border: 1px solid var(--border);
+            animation: slideInLeft 0.5s ease-out;
+        }
+
+        @keyframes slideInLeft {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -26px;
+            top: 20px;
+            width: 12px;
+            height: 12px;
+            background: var(--primary);
+            border-radius: 50%;
+            border: 3px solid var(--dark-light);
+        }
+
+        .timeline-date {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-bottom: 5px;
+        }
+
+        .timeline-message {
+            font-size: 0.95rem;
+            color: var(--text);
+        }
+
+        .copy-link {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 20px;
+            padding: 12px 16px;
+            background: var(--dark);
+            border-radius: 12px;
+            border: 1px solid var(--border);
+        }
+
+        .copy-link input {
+            flex: 1;
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            font-family: inherit;
+        }
+
+        .copy-link button {
+            padding: 8px 16px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+
+        .copy-link button:hover {
+            background: var(--primary-dark);
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .footer a {
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px 15px;
+            }
+
+            .header h1 {
+                font-size: 1.8rem;
+            }
+
+            .search-card {
+                padding: 25px;
+                border-radius: 20px;
+            }
+
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .info-item.full-width {
+                grid-column: span 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-animation">
+        <div class="circle"></div>
+        <div class="circle"></div>
+        <div class="circle"></div>
+    </div>
+
+    <div class="container">
+        <div class="header">
+            <div class="logo">
+                <i class="fas fa-box-open"></i>
+            </div>
+            <h1>Order Tracker</h1>
+            <p>Track your order status in real-time</p>
+        </div>
+
+        <div class="search-card">
+            <div class="input-group">
+                <input type="text" id="orderId" placeholder="Enter your Order ID">
+                <i class="fas fa-search"></i>
+            </div>
+            <button class="btn btn-primary" id="trackBtn" onclick="trackOrder()">
+                <i class="fas fa-location-arrow"></i>
+                Track Order
+            </button>
+
+            <div id="alert" style="display: none;"></div>
+            <div id="orderCard" class="order-card" style="display: none;"></div>
+        </div>
+
+        <div class="footer">
+            <p>Need help? <a href="/cdn-cgi/l/email-protection#e695939696899492a6839e878b968a83c885898b">Contact Support</a></p>
+        </div>
+    </div>
+
+    <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+        const API_URL = window.location.origin + '/api.php';
+        let currentOrder = null;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const orderId = urlParams.get('order_id') || urlParams.get('id');
+            if (orderId) {
+                document.getElementById('orderId').value = orderId;
+                trackOrder();
+            }
+
+            document.getElementById('orderId').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') trackOrder();
+            });
+        });
+
+        async function trackOrder() {
+            const orderId = document.getElementById('orderId').value.trim();
+            if (!orderId) {
+                showAlert('Please enter an Order ID', 'error');
+                return;
+            }
+
+            const btn = document.getElementById('trackBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<div class="loading-spinner"></div> Searching...';
+            hideAlert();
+
+            try {
+                const response = await fetch(`${API_URL}?action=get_order&id=${encodeURIComponent(orderId)}`);
+                const data = await response.json();
+
+                if (data.success) {
+                    currentOrder = data.data;
+                    displayOrder(data.data);
+                    updateURL(orderId);
+                } else {
+                    showAlert(data.message || 'Order not found', 'error');
+                    document.getElementById('orderCard').style.display = 'none';
+                }
+            } catch (error) {
+                showAlert('Connection error. Please try again.', 'error');
+                document.getElementById('orderCard').style.display = 'none';
+            }
+
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-location-arrow"></i> Track Order';
+        }
+
+        function displayOrder(order) {
+            const statusClass = getStatusClass(order.order_status);
+            const statusIcon = getStatusIcon(order.order_status);
+            const paymentClass = order.payment_status === 'Paid' ? 'paid' : 'unpaid';
+
+            let html = `
+                <div class="order-header">
+                    <div class="order-id">Order ID: <span>${order.id}</span></div>
+                    <div class="status-badge ${statusClass}">
+                        <i class="fas ${statusIcon}"></i>
+                        ${order.order_status}
+                    </div>
+                </div>
+
+                <div class="info-grid">
+                    ${order.customer_name ? `
+                    <div class="info-item">
+                        <div class="info-label"><i class="fas fa-user"></i> Customer</div>
+                        <div class="info-value">${order.customer_name}</div>
+                    </div>
+                    ` : ''}
+                    
+                    <div class="info-item">
+                        <div class="info-label"><i class="fas fa-money-bill-wave"></i> Order Amount</div>
+                        <div class="info-value amount">৳${parseFloat(order.order_amount || 0).toLocaleString()}</div>
+                    </div>
+
+                    <div class="info-item">
+                        <div class="info-label"><i class="fas fa-credit-card"></i> Payment Status</div>
+                        <div class="info-value ${paymentClass}">${order.payment_status || 'Unpaid'}</div>
+                    </div>
+
+                    ${order.payment_method ? `
+                    <div class="info-item">
+                        <div class="info-label"><i class="fas fa-wallet"></i> Payment Method</div>
+                        <div class="info-value">${order.payment_method}</div>
+                    </div>
+                    ` : ''}
+
+                    ${order.payment_amount ? `
+                    <div class="info-item">
+                        <div class="info-label"><i class="fas fa-coins"></i> Paid Amount</div>
+                        <div class="info-value amount">৳${parseFloat(order.payment_amount).toLocaleString()}</div>
+                    </div>
+                    ` : ''}
+
+                    ${order.order_description ? `
+                    <div class="info-item full-width">
+                        <div class="info-label"><i class="fas fa-file-alt"></i> Description</div>
+                        <div class="info-value">${order.order_description}</div>
+                    </div>
+                    ` : ''}
+                </div>
+
+                ${order.payment_status === 'Unpaid' && order.payment_link ? `
+                <a href="${order.payment_link}" target="_blank" class="payment-link-btn">
+                    <i class="fas fa-external-link-alt"></i>
+                    Pay Now
+                </a>
+                ` : ''}
+
+                ${order.order_link ? `
+                <a href="${order.order_link}" target="_blank" class="payment-link-btn" style="background: linear-gradient(135deg, var(--info), #2563eb);">
+                    <i class="fas fa-link"></i>
+                    View Order
+                </a>
+                ` : ''}
+            `;
+
+            if (order.updates && order.updates.length > 0) {
+                html += `
+                    <div class="timeline-section">
+                        <div class="timeline-title">
+                            <i class="fas fa-history"></i>
+                            Order Timeline
+                        </div>
+                        <div class="timeline">
+                            ${order.updates.slice().reverse().map(update => `
+                                <div class="timeline-item">
+                                    <div class="timeline-date">${formatDate(update.date)}</div>
+                                    <div class="timeline-message">${update.message}</div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+
+            html += `
+                <div class="copy-link">
+                    <input type="text" id="shareLink" value="${window.location.origin}?order_id=${order.id}" readonly>
+                    <button onclick="copyLink()"><i class="fas fa-copy"></i> Copy</button>
+                </div>
+            `;
+
+            document.getElementById('orderCard').innerHTML = html;
+            document.getElementById('orderCard').style.display = 'block';
+        }
+
+        function getStatusClass(status) {
+            switch(status) {
+                case 'Pending': return 'status-pending';
+                case 'Processing': return 'status-processing';
+                case 'Completed': return 'status-completed';
+                case 'Cancelled': return 'status-cancelled';
+                default: return 'status-pending';
+            }
+        }
+
+        function getStatusIcon(status) {
+            switch(status) {
+                case 'Pending': return 'fa-clock';
+                case 'Processing': return 'fa-spinner fa-spin';
+                case 'Completed': return 'fa-check-circle';
+                case 'Cancelled': return 'fa-times-circle';
+                default: return 'fa-circle';
+            }
+        }
+
+        function formatDate(dateStr) {
+            const date = new Date(dateStr);
+            return date.toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
+        function showAlert(message, type) {
+            const alertEl = document.getElementById('alert');
+            alertEl.className = `alert alert-${type}`;
+            alertEl.innerHTML = `<i class="fas fa-${type === 'error' ? 'exclamation-circle' : 'check-circle'}"></i> ${message}`;
+            alertEl.style.display = 'flex';
+        }
+
+        function hideAlert() {
+            document.getElementById('alert').style.display = 'none';
+        }
+
+        function updateURL(orderId) {
+            const newURL = `${window.location.pathname}?order_id=${orderId}`;
+            window.history.pushState({ orderId }, '', newURL);
+        }
+
+        function copyLink() {
+            const input = document.getElementById('shareLink');
+            input.select();
+            document.execCommand('copy');
+            showAlert('Link copied to clipboard!', 'success');
+            setTimeout(hideAlert, 2000);
+        }
+    </script>
+</body>
+</html>
